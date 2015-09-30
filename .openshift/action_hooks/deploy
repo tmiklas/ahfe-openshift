@@ -1,0 +1,15 @@
+#!/bin/bash
+export PLACK_ENV='production'
+export MOJO_MODE='deployment'
+HT=${OPENSHIFT_REPO_DIR}.htaccess
+SCRIPT=`cd ${OPENSHIFT_REPO_DIR} && ls -1 script`
+
+echo "SetHandler perl-script" > ${HT}
+echo "PerlHandler Plack::Handler::Apache2" >> ${HT}
+echo "PerlSetVar psgi_app ${OPENSHIFT_REPO_DIR}script/${SCRIPT}" >> ${HT}
+echo "RewriteEngine on" >> ${HT}
+echo "RewriteCond %{REQUEST_FILENAME} !-f" >> ${HT}
+echo "RewriteCond %{REQUEST_FILENAME} !-l" >> ${HT}
+echo "RewriteCond %{REQUEST_FILENAME} !-d" >> ${HT}
+echo "RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f" >> ${HT}
+echo "RewriteRule (.*) /script/${SCRIPT}/\$1 [QSA,L]" >> ${HT}
